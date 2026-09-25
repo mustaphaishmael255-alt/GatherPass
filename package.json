@@ -1,0 +1,21 @@
+{
+ "name": "gatherpass",
+ "version": "1.0.0",
+ "type": "module",
+ "description": "GatherPass — Smart Event Companion (Vercel Native Serverless)",
+ "main": "server.js",
+ "scripts": {
+ "start": "tsx server.js",
+ "dev": "tsx server.js",
+ "build": "tsc --noEmit"
+ },
+ "dependencies": {
+ "@supabase/supabase-js": "^2.49.1"
+ },
+ "devDependencies": {
+ "@types/node": "^22.13.9",
+ "@vercel/node": "^5.1.8",
+ "tsx": "^4.23.15",
+ "typescript": "^5.8.2"
+ }
+}

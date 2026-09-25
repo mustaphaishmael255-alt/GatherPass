@@ -1,0 +1,29 @@
+{
+ "version": 2,
+ "rewrites": [
+ { "source": "/planner", "destination": "/planner/index.html" },
+ { "source": "/planner/create", "destination": "/planner/create.html" },
+ { "source": "/planner/events/:id", "destination": "/planner/event-manage.html" },
+ { "source": "/event", "destination": "/event.html" },
+ { "source": "/ticket", "destination": "/ticket.html" },
+ { "source": "/verify", "destination": "/verify.html" }
+ ],
+ "headers": [
+ {
+ "source": "/(.*)",
+ "headers": [
+ { "key": "X-Content-Type-Options", "value": "nosniff" },
+ { "key": "X-Frame-Options", "value": "DENY" },
+ { "key": "X-XSS-Protection", "value": "1; mode=block" }
+ ]
+ },
+ {
+ "source": "/api/(.*)",
+ "headers": [
+ { "key": "Access-Control-Allow-Origin", "value": "*" },
+ { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, PATCH, OPTIONS" },
+ { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+ ]
+ }
+ ]
+}
