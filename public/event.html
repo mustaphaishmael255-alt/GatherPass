@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pass Details — GatherPass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0b0f19;
+      --navy-light: #111827;
+      --purple: #6366f1;
+      --purple-dark: #4f46e5;
+      --blue: #2563eb;
+      --blue-elec: #38bdf8;
+      --gold: #f59e0b;
+      --gold-warm: #fbbf24;
+      --white: #f8fafc;
+      --muted: #94a3b8;
+      --card-bg: #131b2e;
+      --card-border: #1e293b;
+      --radius: 16px;
+      --font: 'Inter', system-ui, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font);
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding-bottom: 5rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .95rem;
+      margin-bottom: 2rem;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: var(--white); }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .layout-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+      .checkout-card { position: static; }
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 1rem .75rem; }
+      .banner-img { height: 200px; }
+      .event-content, .checkout-card { padding: 1.25rem; }
+      .event-title { font-size: 1.5rem; }
+      .meta-boxes { grid-template-columns: 1fr 1fr; gap: .75rem; padding: 1rem; }
+    }
+
+    @media (max-width: 480px) {
+      .meta-boxes { grid-template-columns: 1fr; }
+      .event-content, .checkout-card { padding: 1rem; }
+    }
+
+    /* Event Details Column */
+    .event-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+    }
+    .banner-img {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      display: block;
+    }
+    .event-content {
+      padding: 2rem;
+    }
+    .event-title {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: .75rem;
+    }
+    .organizer-tag {
+      color: var(--blue-elec);
+      font-size: .9rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: inline-block;
+    }
+    .meta-boxes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding: 1.25rem;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 14px;
+    }
+    .meta-box span { display: block; }
+    .meta-box-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; font-weight: 600; }
+    .meta-box-val { font-size: .95rem; font-weight: 600; margin-top: .2rem; }
+    .description-body {
+      font-size: 1rem;
+      color: #cbd5e1;
+      line-height: 1.7;
+    }
+
+    /* Checkout Card Column */
+    .checkout-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      position: sticky;
+      top: 2rem;
+    }
+    .checkout-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.5px;
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: .4rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .form-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: .75rem 1rem;
+      color: #fff;
+      font-family: inherit;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .form-input:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .qty-stepper {
+      display: flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      width: fit-content;
+    }
+    .qty-btn {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: bold;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s;
+    }
+    .qty-btn:hover { background: rgba(255, 255, 255, 0.08); }
+    .qty-num {
+      padding: 0 1rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .breakdown {
+      border-top: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--card-border);
+      padding: 1.25rem 0;
+      margin: 1.5rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: .9rem;
+      color: var(--muted);
+    }
+    .breakdown-total {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      padding-top: .5rem;
+      border-top: 1px dashed var(--card-border);
+    }
+
+    .btn-checkout {
+      width: 100%;
+      background: var(--purple);
+      color: #fff;
+      border: none;
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color .2s;
+    }
+    .btn-checkout:hover {
+      background: var(--purple-dark);
+    }
+    .btn-checkout:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .demo-notice {
+      text-align: center;
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: 1rem;
+      line-height: 1.4;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      border-top-color: var(--purple);
+      animation: spin 1s linear infinite;
+      margin: 5rem auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="nav-back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Discover Events
+    </a>
+
+    <div id="loading" class="spinner"></div>
+
+    <div id="eventWrapper" class="layout-grid" style="display: none;">
+      <!-- Left: Event Details -->
+      <div class="event-card">
+        <img id="evImg" src="" alt="Event Banner" class="banner-img">
+        <div class="event-content">
+          <h1 id="evTitle" class="event-title">Event Title</h1>
+          <div id="evPlanner" class="organizer-tag">Organized by Organizer</div>
+
+          <div class="meta-boxes">
+            <div class="meta-box">
+              <span class="meta-box-label">Date & Time</span>
+              <span id="evDate" class="meta-box-val">Loading...</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-box-label">Venue</span>
+              <span id="evVenue" class="meta-box-val">Loading...</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-box-label">Availability</span>
+              <span id="evRemaining" class="meta-box-val">Loading...</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-box-label">Pass Type</span>
+              <span class="meta-box-val">General Admission</span>
+            </div>
+          </div>
+          <p id="evDesc" class="description-body"></p>
+        </div>
+      </div>
+
+      <!-- Right: Checkout -->
+      <div class="checkout-card">
+        <h2 class="checkout-title">Reserve Passes</h2>
+        <form id="checkoutForm">
+          <div class="form-group">
+            <label class="form-label">Quantity</label>
+            <div class="qty-stepper">
+              <button type="button" class="qty-btn" onclick="adjustQty(-1)">−</button>
+              <span id="qtyDisplay" class="qty-num">1</span>
+              <button type="button" class="qty-btn" onclick="adjustQty(1)">+</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="buyerName">Full Name</label>
+            <input type="text" id="buyerName" class="form-input" placeholder="e.g. Kwame Mensah" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="buyerEmail">Email Address</label>
+            <input type="email" id="buyerEmail" class="form-input" placeholder="e.g. kwame@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="buyerPhone">Phone Number</label>
+            <input type="tel" id="buyerPhone" class="form-input" placeholder="+233 ...">
+          </div>
+
+          <div class="breakdown">
+            <div class="breakdown-row">
+              <span id="labelTickets">1 × Pass</span>
+              <span id="valTickets">GH₵0.00</span>
+            </div>
+            <div class="breakdown-row">
+              <span>Platform Fee (5%)</span>
+              <span id="valFee">GH₵0.00</span>
+            </div>
+            <div class="breakdown-row breakdown-total">
+              <span>Total</span>
+              <span id="valTotal">GH₵0.00</span>
+            </div>
+          </div>
+
+          <button type="submit" id="btnSubmit" class="btn-checkout">Book Pass</button>
+          <p class="demo-notice">Demo Mode: Instant pass generation with cryptographic QR token. No card charge.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentEvent = null;
+    let quantity = 1;
+
+    function formatCurrency(amount) {
+      return 'GH₵' + Number(amount || 0).toFixed(2);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('id') || '1';
+
+    async function loadEvent() {
+      try {
+        const res = await fetch(`/api/events?id=${encodeURIComponent(eventId)}`);
+        const data = await res.json();
+        if (!data.success || !data.event) {
+          alert('Event not found.');
+          window.location.href = '/';
+          return;
+        }
+
+        currentEvent = data.event;
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('eventWrapper').style.display = 'grid';
+
+        document.getElementById('evImg').src = currentEvent.picture || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80';
+        document.getElementById('evTitle').innerText = currentEvent.name;
+        document.getElementById('evPlanner').innerText = 'Organized by ' + (currentEvent.planner_name || 'GatherPass');
+        
+        const d = new Date(currentEvent.event_date);
+        document.getElementById('evDate').innerText = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+        document.getElementById('evVenue').innerText = currentEvent.venue;
+        document.getElementById('evRemaining').innerText = `${currentEvent.available_tickets} passes left`;
+        document.getElementById('evDesc').innerText = currentEvent.description;
+        document.title = `${currentEvent.name} — GatherPass`;
+
+        updatePricing();
+      } catch (err) {
+        console.error(err);
+        alert('Could not load event data.');
+      }
+    }
+
+    function adjustQty(delta) {
+      quantity = Math.max(1, Math.min(10, quantity + delta));
+      document.getElementById('qtyDisplay').innerText = quantity;
+      updatePricing();
+    }
+
+    function updatePricing() {
+      if (!currentEvent) return;
+      const base = Number(currentEvent.base_ticket_price);
+      const feePerTicket = Number(currentEvent.platform_fee);
+      const totalTickets = base * quantity;
+      const totalFee = feePerTicket * quantity;
+      const grandTotal = totalTickets + totalFee;
+
+      document.getElementById('labelTickets').innerText = `${quantity} × Pass (${formatCurrency(base)})`;
+      document.getElementById('valTickets').innerText = formatCurrency(totalTickets);
+      document.getElementById('valFee').innerText = formatCurrency(totalFee);
+      document.getElementById('valTotal').innerText = formatCurrency(grandTotal);
+    }
+
+    document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.innerText = 'Creating Secure Pass...';
+
+      const payload = {
+        event_id: currentEvent.id,
+        buyer_name: document.getElementById('buyerName').value.trim(),
+        buyer_email: document.getElementById('buyerEmail').value.trim(),
+        buyer_phone: document.getElementById('buyerPhone').value.trim(),
+        quantity: quantity
+      };
+
+      try {
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success && data.token) {
+          window.location.href = `/ticket.html?token=${encodeURIComponent(data.token)}`;
+        } else {
+          alert(data.error || 'Checkout failed. Please try again.');
+          btn.disabled = false;
+          btn.innerText = 'Book Pass';
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network error during checkout.');
+        btn.disabled = false;
+        btn.innerText = 'Book Pass';
+      }
+    });
+
+    loadEvent();
+  </script>
+</body>
+</html>

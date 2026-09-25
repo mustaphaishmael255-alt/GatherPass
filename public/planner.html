@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organizer Planner — GatherPass</title>
+  <meta name="description" content="GatherPass Organizer Planner: View live metrics, manage active and draft events, track revenue, and monitor gate check-ins.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0b0f19;
+      --navy-light: #111827;
+      --purple: #6366f1;
+      --purple-dark: #4f46e5;
+      --blue: #2563eb;
+      --blue-elec: #38bdf8;
+      --green: #10b981;
+      --gold: #f59e0b;
+      --gold-warm: #fbbf24;
+      --white: #f8fafc;
+      --muted: #94a3b8;
+      --card-bg: #131b2e;
+      --card-border: #1e293b;
+      --radius: 14px;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font);
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding-bottom: 5rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      position: relative;
+    }
+
+    /* Navigation */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 2rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      text-decoration: none;
+      color: var(--white);
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.5px;
+    }
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--purple);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .btn-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .9rem;
+      font-weight: 600;
+      transition: color .2s;
+    }
+    .btn-link:hover { color: var(--white); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), #6366f1);
+      color: #fff;
+      padding: .65rem 1.25rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: .9rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      transition: all .2s;
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    }
+    .btn-primary:hover {
+      opacity: .95;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+    }
+
+    /* Organizer Header Banner */
+    .organizer-banner {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .organizer-profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .organizer-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+    .organizer-title { font-size: 1.1rem; font-weight: 700; }
+    .organizer-sub { font-size: .85rem; color: var(--muted); }
+    .organizer-disclaimer {
+      font-size: .8rem;
+      color: #94a3b8;
+      margin-top: .2rem;
+    }
+
+    /* Metrics Row */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      backdrop-filter: blur(20px);
+    }
+    .metric-label {
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      font-weight: 700;
+      margin-bottom: .4rem;
+    }
+    .metric-value {
+      font-size: 1.85rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    /* Section Layout */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    .section-title { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+
+    /* Tables & Lists */
+    .card-table {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+      margin-bottom: 3rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+      text-align: left;
+    }
+    th {
+      padding: 1rem 1.5rem;
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--muted);
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--card-border);
+    }
+    td {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #cbd5e1;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    .status-text {
+      font-size: .85rem;
+      font-weight: 500;
+      color: #94a3b8;
+    }
+    .status-text.published {
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+    .status-text.draft {
+      color: #64748b;
+    }
+
+    .table-link {
+      color: var(--blue-elec);
+      font-size: .85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .table-link:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Responsive Mobile Styles */
+    @media (max-width: 768px) {
+      nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 0;
+      }
+      .nav-actions {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: .5rem;
+      }
+      .organizer-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.25rem;
+      }
+      .metrics-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: .75rem;
+      }
+      .metric-card {
+        padding: 1.1rem;
+      }
+      .metric-value {
+        font-size: 1.45rem;
+      }
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .4rem;
+      }
+      th, td {
+        padding: .85rem 1rem;
+        white-space: nowrap;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 0 1rem; }
+      .btn-primary { width: 100%; justify-content: center; }
+      .metric-value { font-size: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="/" class="brand">
+        <span class="brand-dot"></span>GatherPass Organizer
+      </a>
+      <div class="nav-actions">
+        <a href="/" class="btn-link">&larr; Discover Events</a>
+        <a href="/verify.html" class="btn-link">Gate Scanner</a>
+        <a href="/planner/create.html" class="btn-primary">+ Create Event</a>
+      </div>
+    </nav>
+
+    <!-- Organizer Profile Banner -->
+    <div class="organizer-banner">
+      <div class="organizer-profile">
+        <div class="organizer-avatar">AD</div>
+        <div>
+          <div class="organizer-title">Alex Danquah</div>
+          <div class="organizer-sub">alex@gatherpass.com &bull; Organizer ID #GP-942</div>
+          <div class="organizer-disclaimer">Organizer management dashboard.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 Required Dashboard Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Total Events</div>
+        <div id="mTotalEvents" class="metric-value">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Published Events</div>
+        <div id="mPublishedEvents" class="metric-value">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Passes Sold</div>
+        <div id="mTicketsSold" class="metric-value">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Passes Remaining</div>
+        <div id="mTicketsRemaining" class="metric-value">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Revenue from Bookings</div>
+        <div id="mRevenue" class="metric-value">GH₵0.00</div>
+      </div>
+    </div>
+
+    <!-- Recent Events Section -->
+    <div class="section-header">
+      <h2 class="section-title">Recent Events</h2>
+      <a href="/planner/create.html" style="color: var(--blue-elec); font-size: .85rem; font-weight: 600; text-decoration: none;">+ New Event</a>
+    </div>
+    <div class="card-table">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Event Name</th>
+              <th>Status</th>
+              <th>Date & Time</th>
+              <th>Venue</th>
+              <th>Pass Price</th>
+              <th>Passes Available</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="eventsTableBody">
+            <tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--muted);">Loading organizer events...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Recent Bookings / Attendees Section -->
+    <div class="section-header">
+      <h2 class="section-title">Recent Bookings & Attendee Stream</h2>
+      <a href="/verify.html" style="color: var(--blue-elec); font-size: .85rem; font-weight: 600; text-decoration: none;">Open Gate Scanner &rarr;</a>
+    </div>
+    <div class="card-table">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Guest Name</th>
+              <th>Email</th>
+              <th>Event</th>
+              <th>Passes</th>
+              <th>Total Paid</th>
+              <th>Gate Status</th>
+            </tr>
+          </thead>
+          <tbody id="attendeesTableBody">
+            <tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--muted);">Loading attendee stream...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function formatCurrency(amount) {
+      return 'GH₵' + Number(amount || 0).toFixed(2);
+    }
+
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/planner');
+        const data = await res.json();
+        if (!data.success) return;
+
+        const m = data.metrics;
+        document.getElementById('mTotalEvents').innerText = m.totalEvents ?? data.events.length;
+        document.getElementById('mPublishedEvents').innerText = m.publishedEvents ?? data.events.filter(e => e.is_active).length;
+        document.getElementById('mTicketsSold').innerText = m.ticketsSold ?? 0;
+        document.getElementById('mTicketsRemaining').innerText = m.ticketsRemaining ?? 0;
+        document.getElementById('mRevenue').innerText = formatCurrency(m.totalRevenue);
+
+        // Render Events Table
+        const evTable = document.getElementById('eventsTableBody');
+        if (data.events && data.events.length > 0) {
+          evTable.innerHTML = data.events.map(e => {
+            const d = new Date(e.event_date);
+            const isPub = e.is_active;
+            return `
+              <tr>
+                <td style="font-weight: 700; color: #fff;">${e.name}</td>
+                <td>
+                  <span class="status-text ${isPub ? 'published' : 'draft'}">
+                    ${isPub ? 'Published' : 'Draft'}
+                  </span>
+                </td>
+                <td>${d.toLocaleDateString()} ${d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+                <td>${e.venue}</td>
+                <td>${formatCurrency(e.base_ticket_price)}</td>
+                <td>${e.available_tickets} / ${e.capacity}</td>
+                <td>
+                  <a href="/planner/event-manage.html?id=${e.id}" class="table-link">Manage Event</a>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        } else {
+          evTable.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">No events created yet. Click "+ Create Event" to get started!</td></tr>`;
+        }
+
+        // Render Attendees Table
+        const atTable = document.getElementById('attendeesTableBody');
+        if (data.recentAttendees && data.recentAttendees.length > 0) {
+          atTable.innerHTML = data.recentAttendees.map(a => `
+            <tr>
+              <td style="font-weight: 600; color: #fff;">${a.buyer_name || 'Guest'}</td>
+              <td>${a.buyer_email}</td>
+              <td>${a.event_name}</td>
+              <td>${a.quantity} Pass(es)</td>
+              <td>${formatCurrency(a.total_paid)}</td>
+              <td>
+                <span class="status-text ${a.status === 'used' ? 'draft' : 'published'}">
+                  ${a.status === 'used' ? 'Admitted' : 'Valid'}
+                </span>
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          atTable.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem;">No bookings recorded yet.</td></tr>`;
+        }
+      } catch (err) {
+        console.error('Failed to load dashboard:', err);
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gate Scanner & Pass Verification — GatherPass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    :root {
+      --navy: #0b0f19;
+      --navy-light: #111827;
+      --purple: #6366f1;
+      --purple-dark: #4f46e5;
+      --blue: #2563eb;
+      --green: #10b981;
+      --green-glow: #10b981;
+      --red: #ef4444;
+      --gold: #f59e0b;
+      --white: #f8fafc;
+      --muted: #94a3b8;
+      --card-bg: #131b2e;
+      --card-border: #1e293b;
+      --radius: 14px;
+      --font: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font);
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 620px;
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      text-decoration: none;
+      color: #fff;
+    }
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--purple);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Result State Alerts */
+    .result-box {
+      padding: 1.75rem;
+      border-radius: var(--radius);
+      margin-bottom: 1.5rem;
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+      animation: slideDown .3s ease-out;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .res-valid {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .res-already_used {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+    .res-invalid, .res-not_found {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .res-header {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .res-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .res-valid .res-icon { background: var(--green); color: #fff; }
+    .res-already_used .res-icon { background: var(--gold); color: #000; }
+    .res-invalid .res-icon, .res-not_found .res-icon { background: var(--red); color: #fff; }
+
+    .res-title { font-size: 1.3rem; font-weight: 800; }
+    .res-valid .res-title { color: var(--green); }
+    .res-already_used .res-title { color: var(--gold); }
+    .res-invalid .res-title, .res-not_found .res-title { color: #f87171; }
+
+    .res-desc { font-size: .9rem; color: var(--muted); }
+
+    .ticket-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem 1.25rem;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: .85rem;
+    }
+    .td-item span { display: block; }
+    .td-label { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .5px; }
+    .td-val { color: var(--white); font-weight: 600; margin-top: .15rem; }
+
+    /* Scanner Tabs */
+    .scanner-tabs {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: 1.25rem;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: .65rem 1rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      color: var(--muted);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: .85rem;
+      transition: all .2s;
+      text-align: center;
+    }
+    .tab-btn.active {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--purple);
+      color: #fff;
+    }
+
+    #reader {
+      width: 100%;
+      min-height: 280px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .camera-select-wrap {
+      margin-top: .75rem;
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+    }
+    .cam-select {
+      flex: 1;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: .5rem .75rem;
+      border-radius: 8px;
+      font-size: .85rem;
+      outline: none;
+    }
+
+    /* File scan upload area */
+    .file-drop-box {
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .file-drop-box:hover { border-color: var(--purple); }
+
+    .input-group { display: flex; gap: .5rem; }
+    .text-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: .85rem 1rem;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: .95rem;
+    }
+    .text-input:focus {
+      outline: none;
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-submit {
+      background: var(--purple);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: .85rem 1.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color .2s;
+    }
+    .btn-submit:hover { background: var(--purple-dark); }
+
+    .btn-reset {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      padding: .85rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: background .2s;
+    }
+    .btn-reset:hover { background: rgba(255, 255, 255, 0.15); }
+
+    /* Responsive Mobile Styles */
+    @media (max-width: 600px) {
+      body { padding: 1rem .75rem 3rem; }
+      .header { flex-direction: column; align-items: flex-start; gap: .75rem; margin-bottom: 1.25rem; }
+      .header > div { width: 100%; display: flex; justify-content: space-between; }
+      .card { padding: 1.25rem; border-radius: 14px; }
+      .result-box { padding: 1.25rem; border-radius: 14px; }
+      .res-title { font-size: 1.15rem; }
+      .ticket-details-grid { grid-template-columns: 1fr; gap: .65rem; padding: .85rem; }
+      .scanner-tabs { gap: .35rem; }
+      .tab-btn { padding: .55rem .5rem; font-size: .8rem; }
+      .input-group { flex-direction: column; gap: .6rem; }
+      .btn-submit { width: 100%; padding: .85rem; }
+      .camera-select-wrap { flex-direction: column; align-items: stretch; gap: .4rem; }
+      #reader { min-height: 240px; }
+      #reader video { width: 100% !important; max-height: 320px; object-fit: cover; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <a href="/" class="brand">
+        <span class="brand-dot"></span>GatherPass Gate Scanner
+      </a>
+      <div style="display: flex; gap: .75rem; align-items: center;">
+        <a href="/planner" style="color: var(--blue-elec); font-size: .85rem; text-decoration: none;">Organizer Planner</a>
+        <a href="/" style="color: var(--muted); font-size: .85rem; text-decoration: none;">Discover Events</a>
+      </div>
+    </div>
+
+    <div id="resultBox" class="result-box">
+      <div class="res-header">
+        <div id="resIcon" class="res-icon"></div>
+        <div>
+          <div id="resTitle" class="res-title">Result</div>
+          <div id="resMsg" class="res-desc">Details</div>
+        </div>
+      </div>
+
+      <div id="resDetailsGrid" class="ticket-details-grid" style="display: none;">
+        <div class="td-item">
+          <span class="td-label">Event</span>
+          <span id="tdEvent" class="td-val">-</span>
+        </div>
+        <div class="td-item">
+          <span class="td-label">Guest</span>
+          <span id="tdGuest" class="td-val">-</span>
+        </div>
+        <div class="td-item">
+          <span class="td-label">Passes</span>
+          <span id="tdQuantity" class="td-val">-</span>
+        </div>
+        <div class="td-item">
+          <span class="td-label">Paid</span>
+          <span id="tdPaid" class="td-val">-</span>
+        </div>
+      </div>
+
+      <button onclick="resetScanner()" class="btn-reset">Scan Next Attendee</button>
+    </div>
+
+    <div class="card" id="scannerCard">
+      <div class="scanner-tabs">
+        <button class="tab-btn active" id="tabCamera" onclick="switchMode('camera')">Camera</button>
+        <button class="tab-btn" id="tabFile" onclick="switchMode('file')">QR Image</button>
+        <button class="tab-btn" id="tabManual" onclick="switchMode('manual')">Pass Token</button>
+      </div>
+
+      <!-- Live Camera Scanner -->
+      <div id="cameraSection">
+        <div id="reader"></div>
+        <div class="camera-select-wrap">
+          <select id="cameraSelect" class="cam-select" onchange="changeCamera(this.value)">
+            <option value="">Detecting cameras...</option>
+          </select>
+        </div>
+        <p style="text-align: center; color: var(--muted); font-size: .8rem; margin-top: .75rem;">
+          Hold QR pass within the frame to verify entry.
+        </p>
+      </div>
+
+      <!-- Image File Scan -->
+      <div id="fileSection" style="display: none;">
+        <div class="file-drop-box" onclick="document.getElementById('qrFileInput').click()">
+          <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="handleQrFile(this.files[0])">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--purple); margin-bottom: .5rem;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          <p style="font-weight: 700; color: #fff; margin-bottom: .25rem;">Select or Drop QR Pass Screenshot</p>
+          <p style="font-size: .8rem; color: var(--muted);">Instantly decodes and verifies QR pass image</p>
+        </div>
+      </div>
+
+      <!-- Manual Token Entry -->
+      <div id="manualSection" style="display: none;">
+        <form id="manualForm">
+          <div class="input-group">
+            <input type="text" id="manualTokenInput" class="text-input" placeholder="Paste 32-character token here..." required>
+            <button type="submit" class="btn-submit">Verify</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentMode = 'camera';
+    let html5QrCode = null;
+    let selectedCameraId = null;
+
+    function formatCurrency(amount) {
+      return 'GH₵' + Number(amount || 0).toFixed(2);
+    }
+
+    function playAudioFeedback(type) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'valid') {
+          osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+          osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.3);
+        } else {
+          osc.frequency.setValueAtTime(220, ctx.currentTime);
+          gain.gain.setValueAtTime(0.4, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.4);
+        }
+      } catch(e) {}
+    }
+
+    async function verifyToken(token) {
+      stopScanner();
+      try {
+        const res = await fetch('/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: token.trim() })
+        });
+        const data = await res.json();
+        showResult(data);
+      } catch (err) {
+        console.error(err);
+        showResult({ status: 'invalid', title: 'Invalid ticket — entry denied', message: 'Could not connect to verification server.' });
+      }
+    }
+
+    function extractToken(text) {
+      if (!text) return '';
+      text = text.trim();
+      try {
+        const url = new URL(text);
+        const t = url.searchParams.get('token');
+        if (t) return t;
+      } catch(e) {}
+      return text;
+    }
+
+    function showResult(data) {
+      const box = document.getElementById('resultBox');
+      const icon = document.getElementById('resIcon');
+      const title = document.getElementById('resTitle');
+      const msg = document.getElementById('resMsg');
+      const details = document.getElementById('resDetailsGrid');
+
+      box.className = `result-box res-${data.status}`;
+      box.style.display = 'flex';
+
+      let standardTitle = 'Invalid ticket — entry denied';
+      if (data.status === 'valid') {
+        standardTitle = 'Valid — entry approved';
+      } else if (data.status === 'already_used') {
+        standardTitle = 'Already used — entry denied';
+      } else if (data.title) {
+        standardTitle = data.title;
+      }
+
+      title.innerText = standardTitle;
+      msg.innerText = data.message || '';
+
+      if (data.status === 'valid') {
+        icon.innerText = '✓';
+      } else if (data.status === 'already_used') {
+        icon.innerText = '!';
+      } else {
+        icon.innerText = '✕';
+      }
+
+      if (data.ticket) {
+        details.style.display = 'grid';
+        document.getElementById('tdEvent').innerText = data.ticket.event_name || 'GatherPass Event';
+        document.getElementById('tdGuest').innerText = data.ticket.buyer_name || 'Guest';
+        document.getElementById('tdQuantity').innerText = `${data.ticket.quantity} Pass(es)`;
+        document.getElementById('tdPaid').innerText = formatCurrency(data.ticket.total_paid);
+      } else {
+        details.style.display = 'none';
+      }
+
+      playAudioFeedback(data.status);
+    }
+
+    function resetScanner() {
+      document.getElementById('resultBox').style.display = 'none';
+      document.getElementById('manualTokenInput').value = '';
+      if (currentMode === 'camera') {
+        startScanner();
+      }
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+      const camSec = document.getElementById('cameraSection');
+      const fileSec = document.getElementById('fileSection');
+      const manSec = document.getElementById('manualSection');
+
+      document.getElementById('tabCamera').classList.toggle('active', mode === 'camera');
+      document.getElementById('tabFile').classList.toggle('active', mode === 'file');
+      document.getElementById('tabManual').classList.toggle('active', mode === 'manual');
+
+      camSec.style.display = mode === 'camera' ? 'block' : 'none';
+      fileSec.style.display = mode === 'file' ? 'block' : 'none';
+      manSec.style.display = mode === 'manual' ? 'block' : 'none';
+
+      if (mode === 'camera') {
+        startScanner();
+      } else {
+        stopScanner();
+        if (mode === 'manual') document.getElementById('manualTokenInput').focus();
+      }
+    }
+
+    async function initCameras() {
+      try {
+        const devices = await Html5Qrcode.getCameras();
+        const select = document.getElementById('cameraSelect');
+        if (devices && devices.length > 0) {
+          select.innerHTML = devices.map(d => `<option value="${d.id}">${d.label || 'Camera ' + d.id}</option>`).join('');
+          // Prefer back / environment camera
+          const backCam = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear') || d.label.toLowerCase().includes('environment'));
+          selectedCameraId = backCam ? backCam.id : devices[0].id;
+          select.value = selectedCameraId;
+        } else {
+          select.innerHTML = '<option value="">Default Camera</option>';
+        }
+      } catch(e) {
+        console.warn('Camera detection error:', e);
+      }
+    }
+
+    function changeCamera(cameraId) {
+      selectedCameraId = cameraId;
+      stopScanner();
+      startScanner();
+    }
+
+    function startScanner() {
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+      if (html5QrCode.isScanning) return;
+
+      const config = {
+        fps: 15,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0
+      };
+
+      const cameraConstraint = selectedCameraId ? { deviceId: { exact: selectedCameraId } } : { facingMode: "environment" };
+
+      html5QrCode.start(
+        cameraConstraint,
+        config,
+        (decodedText) => {
+          const token = extractToken(decodedText);
+          verifyToken(token);
+        },
+        (errorMessage) => {}
+      ).catch(err => {
+        console.warn("Camera start failed, falling back to facingMode:", err);
+        html5QrCode.start({ facingMode: "user" }, config, (txt) => {
+          verifyToken(extractToken(txt));
+        }, () => {}).catch(() => {});
+      });
+    }
+
+    function stopScanner() {
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().catch(() => {});
+      }
+    }
+
+    async function handleQrFile(file) {
+      if (!file) return;
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+      try {
+        const decodedText = await html5QrCode.scanFile(file, true);
+        const token = extractToken(decodedText);
+        verifyToken(token);
+      } catch(err) {
+        alert('No QR Code detected in image. Please try another image or use manual token entry.');
+      }
+    }
+
+    document.getElementById('manualForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const token = document.getElementById('manualTokenInput').value.trim();
+      if (token) verifyToken(extractToken(token));
+    });
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      await initCameras();
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+      if (urlToken) {
+        verifyToken(urlToken);
+      } else {
+        startScanner();
+      }
+    });
+  </script>
+</body>
+</html>

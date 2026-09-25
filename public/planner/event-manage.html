@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Event — GatherPass Organizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0b0f19;
+      --navy-light: #111827;
+      --purple: #6366f1;
+      --purple-dark: #4f46e5;
+      --blue: #2563eb;
+      --blue-elec: #38bdf8;
+      --green: #10b981;
+      --gold: #f59e0b;
+      --gold-warm: #fbbf24;
+      --white: #f8fafc;
+      --muted: #94a3b8;
+      --card-bg: #131b2e;
+      --card-border: #1e293b;
+      --radius: 14px;
+      --font: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font);
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding-bottom: 5rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .9rem;
+      margin-bottom: 1.5rem;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: var(--white); }
+
+    /* Event Header Card */
+    .event-header-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .event-main-info {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .event-thumb {
+      width: 100px;
+      height: 100px;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 1px solid var(--card-border);
+    }
+    .event-name { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: .4rem; }
+    .event-meta-line { color: var(--muted); font-size: .9rem; display: flex; align-items: center; gap: .75rem; }
+
+    .status-badge {
+      font-size: .85rem;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+    .status-badge.status-published {
+      color: #e2e8f0;
+    }
+    .status-badge.status-draft {
+      color: #64748b;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: .75rem;
+      align-items: center;
+    }
+    .btn {
+      padding: .75rem 1.25rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: .9rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      transition: all .2s;
+      border: none;
+    }
+    .btn-toggle-pub {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid var(--card-border);
+    }
+    .btn-toggle-pub:hover { background: rgba(255, 255, 255, 0.15); }
+    .btn-scanner {
+      background: linear-gradient(135deg, var(--purple), #6366f1);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    }
+    .btn-scanner:hover { transform: translateY(-2px); opacity: .95; }
+
+    /* KPI Cards Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      backdrop-filter: blur(20px);
+    }
+    .kpi-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; font-weight: 700; margin-bottom: .35rem; }
+    .kpi-val { font-size: 1.85rem; font-weight: 900; }
+
+    /* Tab Navigation */
+    .tabs {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: .5rem;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 700;
+      padding: .6rem 1.25rem;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all .2s;
+    }
+    .tab-btn.active {
+      background: rgba(124, 58, 237, 0.2);
+      color: #fff;
+    }
+
+    /* Content Sections */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      margin-bottom: 2.5rem;
+    }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-size: .8rem; font-weight: 700; color: var(--muted); margin-bottom: .4rem; text-transform: uppercase; letter-spacing: .5px; }
+    .form-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: .75rem 1rem;
+      color: #fff;
+      font-family: inherit;
+      font-size: .95rem;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--purple); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+      text-align: left;
+    }
+    th {
+      padding: 1rem 1.25rem;
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--muted);
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--card-border);
+    }
+    td {
+      padding: 1.1rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #cbd5e1;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      border-top-color: var(--purple);
+      animation: spin 1s linear infinite;
+      margin: 5rem auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Responsive Mobile Styles */
+    @media (max-width: 768px) {
+      .container { padding: 1.25rem 1rem; }
+      .event-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.25rem;
+        gap: 1.25rem;
+      }
+      .event-main-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        width: 100%;
+      }
+      .event-thumb {
+        width: 100%;
+        height: 180px;
+      }
+      .event-name { font-size: 1.4rem; }
+      .header-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: .6rem;
+      }
+      .header-actions .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .kpi-grid {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: .75rem;
+      }
+      .kpi-card { padding: 1rem; }
+      .kpi-val { font-size: 1.4rem; }
+      .tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: .25rem;
+      }
+      .tab-btn {
+        white-space: nowrap;
+        font-size: .85rem;
+        padding: .5rem .85rem;
+      }
+      .section-card { padding: 1.25rem; }
+      .form-row { grid-template-columns: 1fr; gap: .5rem; }
+      th, td { padding: .75rem .85rem; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/planner" class="nav-back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back to Organizer Planner
+    </a>
+
+    <div id="loading" class="spinner"></div>
+
+    <div id="manageWrapper" style="display: none;">
+      <!-- Event Top Header -->
+      <div class="event-header-card">
+        <div class="event-main-info">
+          <img id="evThumb" src="" alt="Event Thumbnail" class="event-thumb">
+          <div>
+            <h1 id="evNameHeader" class="event-name">Event Title</h1>
+            <div class="event-meta-line">
+              <span id="evStatusBadge" class="status-badge status-published">Published</span>
+              <span id="evDateHeader">Date & Time</span>
+            </div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="btnTogglePub" class="btn btn-toggle-pub" onclick="togglePublishState()">Unpublish Event</button>
+          <a id="btnPublicLink" href="#" target="_blank" class="btn btn-toggle-pub">View Public Page &nearr;</a>
+          <a href="/verify.html" class="btn btn-scanner">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>Gate Scanner
+          </a>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Passes Sold</div>
+          <div id="kpiSold" class="kpi-val">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Passes Remaining</div>
+          <div id="kpiRemaining" class="kpi-val">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Event Revenue</div>
+          <div id="kpiRevenue" class="kpi-val">GH₵0.00</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Gate Checked-In</div>
+          <div id="kpiCheckIns" class="kpi-val">0</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tabBtnEdit" onclick="switchTab('edit')">Edit Event Information</button>
+        <button class="tab-btn" id="tabBtnAttendees" onclick="switchTab('attendees')">Attendee Check-In Stream (<span id="attendeeCount">0</span>)</button>
+      </div>
+
+      <!-- Edit Form Tab -->
+      <div id="tabEditSection" class="section-card">
+        <form id="editForm">
+          <div class="form-group">
+            <label class="form-label" for="editName">Event Name</label>
+            <input type="text" id="editName" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editDesc">Description</label>
+            <textarea id="editDesc" class="form-input" style="height: 100px; resize: vertical;" required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="editDate">Date & Time</label>
+              <input type="datetime-local" id="editDate" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editVenue">Venue</label>
+              <input type="text" id="editVenue" class="form-input" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="editPrice">Base Pass Price (GH₵)</label>
+              <input type="number" step="0.01" id="editPrice" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editCapacity">Total Capacity</label>
+              <input type="number" id="editCapacity" class="form-input" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editPicture">Banner Image URL</label>
+            <input type="text" id="editPicture" class="form-input">
+          </div>
+
+          <button type="submit" id="btnSave" class="btn btn-scanner" style="width: 100%; justify-content: center; padding: 1rem; margin-top: .5rem;">Save Event Changes</button>
+        </form>
+      </div>
+
+      <!-- Attendees Tab -->
+      <div id="tabAttendeesSection" class="section-card" style="display: none; padding: 0; overflow: hidden;">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Guest</th>
+                <th>Email</th>
+                <th>Passes</th>
+                <th>Amount</th>
+                <th>Ticket Token</th>
+                <th>Gate Status</th>
+              </tr>
+            </thead>
+            <tbody id="eventAttendeesTable">
+              <tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--muted);">Loading event attendees...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function formatCurrency(amount) {
+      return 'GH₵' + Number(amount || 0).toFixed(2);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('id');
+
+    let currentEvent = null;
+
+    async function loadEventData() {
+      if (!eventId) {
+        alert('No event ID provided.');
+        window.location.href = '/planner';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/planner?id=${encodeURIComponent(eventId)}`);
+        const data = await res.json();
+        if (!data.success || !data.event) {
+          alert('Event not found.');
+          window.location.href = '/planner';
+          return;
+        }
+
+        currentEvent = data.event;
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('manageWrapper').style.display = 'block';
+
+        // Header
+        document.getElementById('evThumb').src = currentEvent.picture || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80';
+        document.getElementById('evNameHeader').innerText = currentEvent.name;
+        
+        const d = new Date(currentEvent.event_date);
+        document.getElementById('evDateHeader').innerText = `${d.toLocaleDateString()} • ${currentEvent.venue}`;
+        
+        // Status badge
+        const badge = document.getElementById('evStatusBadge');
+        const btnToggle = document.getElementById('btnTogglePub');
+        if (currentEvent.is_active) {
+          badge.className = 'status-badge status-published';
+          badge.innerText = '● Published';
+          btnToggle.innerText = 'Unpublish Event';
+        } else {
+          badge.className = 'status-badge status-draft';
+          badge.innerText = '○ Draft';
+          btnToggle.innerText = 'Publish Event';
+        }
+
+        document.getElementById('btnPublicLink').href = `/event.html?id=${currentEvent.id}`;
+
+        // KPIs
+        document.getElementById('kpiSold').innerText = data.stats.ticketsSold;
+        document.getElementById('kpiRemaining').innerText = data.stats.ticketsRemaining;
+        document.getElementById('kpiRevenue').innerText = formatCurrency(data.stats.totalRevenue);
+        document.getElementById('kpiCheckIns').innerText = data.stats.checkIns;
+
+        // Edit form fields
+        document.getElementById('editName').value = currentEvent.name;
+        document.getElementById('editDesc').value = currentEvent.description;
+        document.getElementById('editDate').value = d.toISOString().slice(0, 16);
+        document.getElementById('editVenue').value = currentEvent.venue;
+        document.getElementById('editPrice').value = Number(currentEvent.base_ticket_price).toFixed(2);
+        document.getElementById('editCapacity').value = currentEvent.capacity;
+        document.getElementById('editPicture').value = currentEvent.picture;
+
+        // Attendees Table
+        document.getElementById('attendeeCount').innerText = data.attendees.length;
+        const atTable = document.getElementById('eventAttendeesTable');
+        if (data.attendees && data.attendees.length > 0) {
+          atTable.innerHTML = data.attendees.map(a => `
+            <tr>
+              <td style="font-weight: 700; color: #fff;">${a.buyer_name || 'Guest'}</td>
+              <td>${a.buyer_email}</td>
+              <td>${a.quantity} Pass(es)</td>
+              <td>${formatCurrency(a.total_paid)}</td>
+              <td><code style="font-family: var(--font-mono); color: var(--blue-elec); font-size: .8rem;">${a.ticket_token.substring(0, 10)}...</code></td>
+              <td>
+                <span class="status-badge ${a.status === 'used' ? 'status-draft' : 'status-published'}">
+                  ${a.status === 'used' ? 'Admitted' : 'Valid'}
+                </span>
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          atTable.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--muted);">No bookings recorded for this event yet.</td></tr>`;
+        }
+
+        document.title = `Manage: ${currentEvent.name} — GatherPass`;
+      } catch (err) {
+        console.error(err);
+        alert('Could not load event data.');
+      }
+    }
+
+    function switchTab(tab) {
+      const tabEdit = document.getElementById('tabEditSection');
+      const tabAtt = document.getElementById('tabAttendeesSection');
+      const btnEdit = document.getElementById('tabBtnEdit');
+      const btnAtt = document.getElementById('tabBtnAttendees');
+
+      if (tab === 'edit') {
+        tabEdit.style.display = 'block';
+        tabAtt.style.display = 'none';
+        btnEdit.classList.add('active');
+        btnAtt.classList.remove('active');
+      } else {
+        tabEdit.style.display = 'none';
+        tabAtt.style.display = 'block';
+        btnEdit.classList.remove('active');
+        btnAtt.classList.add('active');
+      }
+    }
+
+    async function togglePublishState() {
+      if (!currentEvent) return;
+      const newState = !currentEvent.is_active;
+      try {
+        const res = await fetch(`/api/planner?id=${currentEvent.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_active: newState })
+        });
+        const result = await res.json();
+        if (result.success) {
+          alert(newState ? 'Event is now published and live on GatherPass!' : 'Event is now unpublished (Draft).');
+          loadEventData();
+        } else {
+          alert('Failed to update status.');
+        }
+      } catch (err) {
+        alert('Network error.');
+      }
+    }
+
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSave');
+      btn.disabled = true;
+      btn.innerText = 'Saving Changes...';
+
+      const payload = {
+        name: document.getElementById('editName').value.trim(),
+        description: document.getElementById('editDesc').value.trim(),
+        event_date: new Date(document.getElementById('editDate').value).toISOString(),
+        venue: document.getElementById('editVenue').value.trim(),
+        base_ticket_price: document.getElementById('editPrice').value,
+        capacity: document.getElementById('editCapacity').value,
+        picture: document.getElementById('editPicture').value.trim()
+      };
+
+      try {
+        const res = await fetch(`/api/planner?id=${currentEvent.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if (result.success) {
+          alert('Event details updated successfully!');
+          loadEventData();
+        } else {
+          alert(result.error || 'Failed to save changes.');
+        }
+      } catch (err) {
+        alert('Network error.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Save Event Changes';
+      }
+    });
+
+    loadEventData();
+  </script>
+</body>
+</html>

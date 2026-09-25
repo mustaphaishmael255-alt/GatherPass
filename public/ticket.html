@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Pass — GatherPass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0b0f19;
+      --navy-light: #111827;
+      --purple: #6366f1;
+      --blue: #2563eb;
+      --blue-elec: #38bdf8;
+      --green: #10b981;
+      --gold: #f59e0b;
+      --white: #f8fafc;
+      --muted: #94a3b8;
+      --card-bg: #131b2e;
+      --card-border: #1e293b;
+      --radius: 16px;
+      --font: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font);
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 580px;
+      position: relative;
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .9rem;
+      margin-bottom: 1.5rem;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: var(--white); }
+
+    .ticket-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(20px);
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    .ticket-header {
+      padding: 1.5rem 2rem;
+      background: rgba(124, 58, 237, 0.15);
+      border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-pill {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--purple);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .35rem .75rem;
+      border-radius: 9999px;
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .status-valid {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .status-used {
+      background: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .ticket-body {
+      padding: 2rem;
+    }
+    .event-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: .5rem;
+    }
+    .event-planner {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .grid-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 540px) {
+      body { padding: 1rem .75rem 3rem; }
+      .ticket-header { padding: 1.25rem; }
+      .ticket-body { padding: 1.25rem; }
+      .event-title { font-size: 1.3rem; }
+      .grid-info { grid-template-columns: 1fr; gap: .85rem; }
+      .tear-line { margin: 0 -1.25rem 1.5rem; }
+      .actions-bar { flex-direction: column; }
+    }
+    .info-item { display: flex; flex-direction: column; gap: .25rem; }
+    .info-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; font-weight: 600; }
+    .info-value { font-size: .95rem; font-weight: 600; color: var(--white); }
+
+    .tear-line {
+      position: relative;
+      height: 1px;
+      border-top: 2px dashed rgba(255, 255, 255, 0.15);
+      margin: 0 -2rem 2rem;
+    }
+    .tear-notch {
+      position: absolute;
+      top: -12px;
+      width: 24px;
+      height: 24px;
+      background: var(--navy);
+      border-radius: 50%;
+    }
+    .tear-left { left: -12px; }
+    .tear-right { right: -12px; }
+
+    .qr-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1rem;
+    }
+    .qr-frame {
+      background: #fff;
+      padding: .75rem;
+      border-radius: 16px;
+      display: inline-flex;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    .qr-frame img {
+      display: block;
+      width: 180px;
+      height: 180px;
+      border-radius: 8px;
+    }
+
+    .token-display {
+      font-family: var(--font-mono);
+      font-size: .8rem;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--card-border);
+      padding: .5rem 1rem;
+      border-radius: 8px;
+      color: var(--blue-elec);
+      letter-spacing: 1px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      cursor: pointer;
+      word-break: break-all;
+      max-width: 100%;
+      transition: background .2s;
+    }
+    .token-display:hover { background: rgba(255, 255, 255, 0.08); }
+    .qr-hint { font-size: .8rem; color: var(--muted); max-width: 320px; }
+
+    .actions-bar {
+      display: flex;
+      gap: .75rem;
+      margin-top: 1.5rem;
+    }
+    .btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      padding: .85rem 1.25rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: .9rem;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+    }
+    .btn-primary {
+      background: var(--purple);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #4f46e5; }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--white);
+      border: 1px solid var(--card-border);
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      border-top-color: var(--purple);
+      animation: spin 1s linear infinite;
+      margin: 5rem auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media print {
+      body { background: #fff; color: #000; padding: 0; }
+      .glow, .nav-back, .actions-bar { display: none !important; }
+      .ticket-card { box-shadow: none; border: 2px solid #000; background: #fff; }
+      .ticket-header { background: #f0f0f0; border-color: #ccc; }
+      .tear-notch { display: none; }
+      .token-display { color: #000; border-color: #ccc; background: #f8f8f8; }
+      .info-value, .event-title { color: #000 !important; }
+      .info-label, .event-planner, .qr-hint { color: #555 !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="nav-back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back to Discover Events
+    </a>
+
+    <div id="loading" class="spinner"></div>
+
+    <div id="ticketWrapper" style="display: none;">
+      <div class="ticket-card">
+        <div class="ticket-header">
+          <div class="brand-pill">
+            <span class="brand-dot"></span>GatherPass
+          </div>
+          <div id="statusBadge" class="status-badge status-valid">
+            <span id="statusDot" class="status-dot pulse"></span>
+            <span id="statusText">Valid Pass</span>
+          </div>
+        </div>
+
+        <div class="ticket-body">
+          <h1 id="ticketEventName" class="event-title">Event Title</h1>
+          <div id="ticketPlanner" class="event-planner">Organized by Organizer</div>
+
+          <div class="grid-info">
+            <div class="info-item">
+              <span class="info-label">Date & Time</span>
+              <span id="ticketDate" class="info-value">Loading...</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Venue</span>
+              <span id="ticketVenue" class="info-value">Loading...</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Attendee</span>
+              <span id="ticketGuest" class="info-value">Guest</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Passes</span>
+              <span id="ticketQuantity" class="info-value">1 × General Admission</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Email</span>
+              <span id="ticketEmail" class="info-value">email@example.com</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Amount Paid</span>
+              <span id="ticketTotal" class="info-value">GH₵0.00</span>
+            </div>
+          </div>
+
+          <div class="tear-line">
+            <div class="tear-notch tear-left"></div>
+            <div class="tear-notch tear-right"></div>
+          </div>
+
+          <div class="qr-section">
+            <div class="qr-frame">
+              <img id="qrImg" src="" alt="GatherPass QR Pass">
+            </div>
+            <div class="token-display" onclick="copyToken()" title="Click to copy token">
+              <span id="tokenText"></span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </div>
+            <p class="qr-hint">Present this QR code or token at event check-in. One scan grants entry for your party.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-bar">
+        <button onclick="window.print()" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>Print / Save Pass
+        </button>
+        <a id="btnTestVerify" href="#" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>Test Entry Verification
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function formatCurrency(amount) {
+      return 'GH₵' + Number(amount || 0).toFixed(2);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    if (!token) {
+      alert('No pass token provided.');
+      window.location.href = '/';
+    }
+
+    async function loadTicket() {
+      try {
+        const res = await fetch(`/api/ticket?token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+        if (!data.success || !data.ticket) {
+          alert('Pass not found.');
+          window.location.href = '/';
+          return;
+        }
+
+        const t = data.ticket;
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('ticketWrapper').style.display = 'block';
+
+        document.getElementById('ticketEventName').innerText = t.event_name || 'GatherPass Event';
+        document.getElementById('ticketPlanner').innerText = 'Organized by ' + (t.planner_name || 'GatherPass');
+
+        if (t.event_date) {
+          const d = new Date(t.event_date);
+          document.getElementById('ticketDate').innerText = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+        } else {
+          document.getElementById('ticketDate').innerText = 'See schedule';
+        }
+
+        document.getElementById('ticketVenue').innerText = t.venue || 'Event Venue';
+        document.getElementById('ticketGuest').innerText = t.buyer_name || 'Guest';
+        document.getElementById('ticketQuantity').innerText = `${t.quantity} × ${t.ticket_type || 'General Admission'}`;
+        document.getElementById('ticketEmail').innerText = t.buyer_email;
+        document.getElementById('ticketTotal').innerText = formatCurrency(t.total_paid);
+
+        // Status
+        const badge = document.getElementById('statusBadge');
+        const dot = document.getElementById('statusDot');
+        const text = document.getElementById('statusText');
+
+        if (t.status === 'used') {
+          badge.className = 'status-badge status-used';
+          dot.className = 'status-dot';
+          text.innerText = 'Already Used';
+        } else {
+          badge.className = 'status-badge status-valid';
+          dot.className = 'status-dot pulse';
+          text.innerText = 'Valid Pass';
+        }
+
+        // High-contrast, universally readable QR code
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(t.ticket_token)}&margin=10&bgcolor=ffffff&color=000000&qzone=1`;
+        document.getElementById('qrImg').src = qrUrl;
+        document.getElementById('tokenText').innerText = t.ticket_token;
+
+        document.getElementById('btnTestVerify').href = `/verify.html?token=${encodeURIComponent(t.ticket_token)}`;
+        document.title = `Pass: ${t.event_name || 'GatherPass'}`;
+      } catch (err) {
+        console.error(err);
+        alert('Failed to load pass.');
+      }
+    }
+
+    function copyToken() {
+      const tokenVal = document.getElementById('tokenText').innerText;
+      navigator.clipboard.writeText(tokenVal).then(() => {
+        alert('Pass token copied to clipboard!');
+      });
+    }
+
+    loadTicket();
+  </script>
+</body>
+</html>
