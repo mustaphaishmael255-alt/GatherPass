@@ -98,7 +98,17 @@
       try {
         const response = await fetch('/api/events'); const data = await response.json();
         thinking.remove();
-        let events = data.events || [];
+        const allEvents = data.events || [];
+        let events = allEvents;
+        const normalizedRequest = lower.replace(/[^a-z0-9]+/g, ' ').trim();
+        const exactMatch = allEvents.find(ev => {
+          const title = String(ev.name || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+          return title === normalizedRequest || normalizedRequest.includes(title);
+        });
+        if (exactMatch) {
+          addBubble('', 'assistant', renderEvents([exactMatch]));
+          return;
+        }
         const location = ['accra','kumasi','osu','laboma'].find(word => lower.includes(word));
         const topic = ['tech','festival','founder','music','network'].find(word => lower.includes(word));
         if (location) events = events.filter(ev => `${ev.venue} ${ev.name} ${ev.description}`.toLowerCase().includes(location));

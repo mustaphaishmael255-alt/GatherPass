@@ -9,7 +9,7 @@ GatherPass is an end-to-end event ticketing and admission web platform built for
 GatherPass includes a clearly labeled web-based Alexa+ simulation at [`/assistant.html`](public/assistant.html). It demonstrates the conversational flow planned for an event companion:
 
 1. An attendee asks for events using natural language, such as “find tech events in Accra”.
-2. The simulation searches the same `/api/events` endpoint used by the main product.
+2. The simulation searches the same `/api/events` endpoint used by the main product, prioritizing an exact event-title match before falling back to location and topic keywords.
 3. It returns matching events with date, venue, and price details.
 4. The attendee can continue directly into the existing pass-booking flow.
 
