@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ask GatherPass — Alexa+ Simulation</title>
+  <meta name="description" content="A GatherPass Alexa+ simulated experience for discovering Ghana events.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --navy:#0b0f19; --panel:#131b2e; --line:#26334b; --purple:#6366f1; --cyan:#38bdf8; --gold:#fbbf24; --text:#f8fafc; --muted:#94a3b8; --green:#34d399; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { min-height:100vh; background:radial-gradient(circle at 80% 0%,rgba(99,102,241,.20),transparent 34rem),var(--navy); color:var(--text); font-family:Inter,system-ui,sans-serif; line-height:1.55; }
+    .wrap { max-width:920px; margin:auto; padding:0 1.25rem 4rem; }
+    nav { display:flex; justify-content:space-between; align-items:center; padding:1.4rem 0; border-bottom:1px solid var(--line); }
+    .brand { color:var(--text); text-decoration:none; font-size:1.25rem; font-weight:800; }
+    .brand span { display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--purple); margin-right:.55rem; }
+    nav a:last-child { color:var(--cyan); text-decoration:none; font-size:.9rem; font-weight:600; }
+    .hero { padding:4rem 0 2rem; max-width:720px; }
+    .eyebrow { color:var(--gold); font-size:.78rem; letter-spacing:.11em; text-transform:uppercase; font-weight:800; margin-bottom:1rem; }
+    h1 { font-size:clamp(2.1rem,6vw,4rem); line-height:1.08; letter-spacing:-1.5px; margin-bottom:1rem; }
+    .hero p { color:var(--muted); font-size:1.05rem; }
+    .notice { margin:1.5rem 0; padding:1rem 1.1rem; border:1px solid rgba(251,191,36,.32); background:rgba(251,191,36,.08); border-radius:12px; color:#fde68a; font-size:.9rem; }
+    .assistant { background:rgba(19,27,46,.86); border:1px solid var(--line); border-radius:18px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.28); }
+    .assistant-head { display:flex; align-items:center; gap:.8rem; padding:1.1rem 1.25rem; border-bottom:1px solid var(--line); }
+    .orb { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--purple),var(--cyan)); box-shadow:0 0 24px rgba(99,102,241,.45); }
+    .assistant-head strong { display:block; }
+    .assistant-head small { color:var(--green); }
+    #conversation { min-height:250px; max-height:520px; overflow:auto; padding:1.25rem; display:flex; flex-direction:column; gap:1rem; }
+    .bubble { max-width:85%; padding:.85rem 1rem; border-radius:14px; font-size:.94rem; white-space:pre-line; }
+    .bubble.assistant { align-self:flex-start; background:#1b2942; border-bottom-left-radius:4px; }
+    .bubble.user { align-self:flex-end; background:var(--purple); border-bottom-right-radius:4px; }
+    .event-list { display:grid; gap:.7rem; margin-top:.8rem; }
+    .event-card { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.8rem; border:1px solid var(--line); background:rgba(11,15,25,.5); border-radius:10px; }
+    .event-card strong { display:block; font-size:.88rem; }
+    .event-card small { color:var(--muted); display:block; font-size:.76rem; }
+    .event-card a { flex-shrink:0; color:#fff; background:var(--purple); padding:.45rem .7rem; border-radius:7px; text-decoration:none; font-size:.76rem; font-weight:700; }
+    .composer { padding:1rem 1.25rem 1.2rem; border-top:1px solid var(--line); }
+    form { display:flex; gap:.6rem; }
+    input { flex:1; min-width:0; color:var(--text); background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:.85rem 1rem; outline:none; font:inherit; }
+    input:focus { border-color:var(--purple); box-shadow:0 0 0 3px rgba(99,102,241,.18); }
+    button { border:0; border-radius:10px; background:var(--purple); color:#fff; padding:.8rem 1.1rem; font-weight:700; cursor:pointer; font:inherit; }
+    button:hover { background:#4f46e5; }
+    .suggestions { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+    .suggestions button { background:transparent; border:1px solid var(--line); color:var(--muted); padding:.45rem .65rem; font-size:.78rem; }
+    .suggestions button:hover { color:#fff; border-color:var(--purple); }
+    .how { margin-top:2.5rem; display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+    .how article { padding:1rem; border:1px solid var(--line); border-radius:12px; background:rgba(19,27,46,.5); }
+    .how b { display:block; margin-bottom:.35rem; }
+    .how p { color:var(--muted); font-size:.84rem; }
+    @media(max-width:640px) { .hero { padding-top:2.5rem; } form { flex-direction:column; } button { width:100%; } .how { grid-template-columns:1fr; } .event-card { align-items:flex-start; flex-direction:column; } .event-card a { width:100%; text-align:center; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <nav><a class="brand" href="/"><span></span>GatherPass</a><a href="/">Back to events</a></nav>
+    <section class="hero">
+      <div class="eyebrow">Alexa+ track prototype</div>
+      <h1>Ask GatherPass what’s happening.</h1>
+      <p>Try a simulated conversational experience for finding Ghana events and getting a direct route to book a pass.</p>
+      <div class="notice"><strong>Honest prototype label:</strong> this is a web-based Alexa+ simulation, not a live Alexa Skill. The interaction logic is included in the repository for judging.</div>
+    </section>
+    <section class="assistant" aria-label="Ask GatherPass assistant">
+      <div class="assistant-head"><div class="orb" aria-hidden="true"></div><div><strong>Ask GatherPass</strong><small>Simulation ready</small></div></div>
+      <div id="conversation" aria-live="polite"></div>
+      <div class="composer">
+        <form id="askForm"><input id="prompt" autocomplete="off" placeholder="Try: find tech events in Accra" aria-label="Ask GatherPass a question"><button type="submit">Ask</button></form>
+        <div class="suggestions"><button type="button" data-prompt="What events are happening in Accra?">Events in Accra</button><button type="button" data-prompt="Find a tech event">Find a tech event</button><button type="button" data-prompt="How do I book a pass?">How to book</button></div>
+      </div>
+    </section>
+    <section class="how"><article><b>1. Ask</b><p>Use natural language to describe an event or location.</p></article><article><b>2. Discover</b><p>The simulation searches the same live event endpoint as the main app.</p></article><article><b>3. Continue</b><p>Choose an event to continue into the existing booking flow.</p></article></section>
+  </main>
+  <script>
+    const conversation = document.getElementById('conversation');
+    const form = document.getElementById('askForm');
+    const promptInput = document.getElementById('prompt');
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const addBubble = (text, role='assistant', html='') => { const el = document.createElement('div'); el.className = `bubble ${role}`; el.innerHTML = html || esc(text); conversation.appendChild(el); conversation.scrollTop = conversation.scrollHeight; return el; };
+    const dateLabel = value => new Date(value).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+    function renderEvents(events) {
+      return `<div>${events.length === 1 ? 'Here is a matching event:' : `I found ${events.length} matching events:`}<div class="event-list">${events.map(ev => `<div class="event-card"><div><strong>${esc(ev.name)}</strong><small>${esc(dateLabel(ev.event_date))} · ${esc(ev.venue)} · GH₵${Number(ev.total_price || ev.base_ticket_price || 0).toFixed(2)}</small></div><a href="/event.html?id=${encodeURIComponent(ev.id)}">Book pass</a></div>`).join('')}</div></div>`;
+    }
+    async function answer(raw) {
+      const text = raw.trim(); if (!text) return;
+      addBubble(text, 'user'); promptInput.value = '';
+      const lower = text.toLowerCase();
+      if (/book|buy|purchase|ticket|pass/.test(lower) && !/find|event|show|what/.test(lower)) {
+        addBubble('To book a pass, choose an event, review the details, and select “Book Pass”. I can help you find one first.'); return;
+      }
+      const thinking = addBubble('Checking the GatherPass event list…');
+      try {
+        const response = await fetch('/api/events'); const data = await response.json();
+        thinking.remove();
+        let events = data.events || [];
+        const location = ['accra','kumasi','osu','laboma'].find(word => lower.includes(word));
+        const topic = ['tech','festival','founder','music','network'].find(word => lower.includes(word));
+        if (location) events = events.filter(ev => `${ev.venue} ${ev.name} ${ev.description}`.toLowerCase().includes(location));
+        if (topic) events = events.filter(ev => `${ev.venue} ${ev.name} ${ev.description}`.toLowerCase().includes(topic));
+        if (/weekend|soon|upcoming|happening|find|show|what|event/.test(lower) && events.length) addBubble('', 'assistant', renderEvents(events));
+        else if (events.length) addBubble('', 'assistant', renderEvents(events.slice(0,3)));
+        else addBubble('I could not find a matching event yet. Try “show all events” or ask for events in Accra.');
+      } catch (error) { thinking.remove(); addBubble('I could not reach the event service. Please try again or browse the event list directly.'); }
+    }
+    form.addEventListener('submit', event => { event.preventDefault(); answer(promptInput.value); });
+    document.querySelectorAll('[data-prompt]').forEach(button => button.addEventListener('click', () => answer(button.dataset.prompt)));
+    addBubble('Hi, I’m the GatherPass simulated assistant. Ask me to find an event in Accra, find a tech event, or explain how to book a pass.');
+  </script>
+</body>
+</html>

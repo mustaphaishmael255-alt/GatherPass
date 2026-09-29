@@ -4,6 +4,17 @@
 
 GatherPass is an end-to-end event ticketing and admission web platform built for native **Vercel Serverless** deployment with a lightweight **HTML/CSS/JavaScript** frontend, **Node.js/TypeScript** serverless API routes, and a hosted **Supabase (PostgreSQL)** database (with an integrated in-memory fallback store).
 
+## Alexa+ simulated experience
+
+GatherPass includes a clearly labeled web-based Alexa+ simulation at [`/assistant.html`](public/assistant.html). It demonstrates the conversational flow planned for an event companion:
+
+1. An attendee asks for events using natural language, such as “find tech events in Accra”.
+2. The simulation searches the same `/api/events` endpoint used by the main product.
+3. It returns matching events with date, venue, and price details.
+4. The attendee can continue directly into the existing pass-booking flow.
+
+This is an **honest simulation**, not a live Alexa Skill or MCP server. Its source code is included in the repository so the interaction model is inspectable and reproducible.
+
 ---
 
 ## Architecture Overview
